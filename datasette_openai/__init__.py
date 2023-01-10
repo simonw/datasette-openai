@@ -37,6 +37,7 @@ def openai_davinci(prompt, max_tokens, temperature, api_key):
             "max_tokens": max_tokens,
             "temperature": temperature,
         },
+        timeout=15.0,
     )
     response.raise_for_status()
     return response.json()["choices"][0]["text"]
