@@ -32,7 +32,7 @@ setup(
     version=VERSION,
     packages=["datasette_openai"],
     entry_points={"datasette": ["openai = datasette_openai"]},
-    install_requires=["datasette"],
+    install_requires=["datasette", "regex"],
     extras_require={"test": ["pytest", "pytest-asyncio"]},
     python_requires=">=3.7",
 )

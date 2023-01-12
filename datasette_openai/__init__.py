@@ -1,10 +1,24 @@
 from datasette import hookimpl
 import httpx
+import json
 import re
+import regex
 import struct
 
-
 tag_re = re.compile(r"<[^>]*>")
+
+# From https://github.com/openai/gpt-2/blob/a74da5d99abaaba920de8131d64da2862a8f213b/src/encoder.py#L53
+token_re = regex.compile(
+    r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+)
+
+
+def tokenize(text):
+    return [t.strip() for t in token_re.findall(text)]
+
+
+def count_tokens(text):
+    return len(tokenize(text))
 
 
 @hookimpl
@@ -13,6 +27,8 @@ def prepare_connection(conn):
     conn.create_function("openai_embedding_similarity", 2, openai_embedding_similarity)
     conn.create_function("openai_davinci", 4, openai_davinci)
     conn.create_function("openai_strip_tags", 1, openai_strip_tags)
+    conn.create_function("openai_count_tokens", 1, count_tokens)
+    conn.create_function("openai_tokenize", 1, lambda s: json.dumps(tokenize(s)))
 
 
 def openai_strip_tags(text):

@@ -82,6 +82,17 @@ limit 10
 
 Sometimes it can be useful to strip HTML tags from text in order to reduce the number of tokens used. This function does a very simple version of tag stripping - just removing anything that matches `<...>`.
 
+## openai_tokenize(text)
+
+Returns a JSON array of tokens for the provided text.
+
+This uses a regular expression [extracted from OpenAI's GPT-2](https://github.com/openai/gpt-2/blob/a74da5d99abaaba920de8131d64da2862a8f213b/src/encoder.py#L53).
+
+## openai_count_tokens(text)
+
+Returns a count of the number of tokens in the provided text.
+
+
 ## Development
 
 To set up this plugin locally, first checkout the code. Then create a new virtual environment:
