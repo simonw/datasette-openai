@@ -78,6 +78,10 @@ order by
 limit 10
 ```
 
+## openai_strip_tags(text)
+
+Sometimes it can be useful to strip HTML tags from text in order to reduce the number of tokens used. This function does a very simple version of tag stripping - just removing anything that matches `<...>`.
+
 ## Development
 
 To set up this plugin locally, first checkout the code. Then create a new virtual environment:

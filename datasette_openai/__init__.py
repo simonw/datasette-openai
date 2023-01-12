@@ -1,6 +1,10 @@
 from datasette import hookimpl
 import httpx
+import re
 import struct
+
+
+tag_re = re.compile(r"<[^>]*>")
 
 
 @hookimpl
@@ -8,6 +12,12 @@ def prepare_connection(conn):
     conn.create_function("openai_embedding", 2, openai_embedding)
     conn.create_function("openai_embedding_similarity", 2, openai_embedding_similarity)
     conn.create_function("openai_davinci", 4, openai_davinci)
+    conn.create_function("openai_strip_tags", 1, openai_strip_tags)
+
+
+def openai_strip_tags(text):
+    "A very naive tag stripping implementation but good enough for now"
+    return tag_re.sub("", text)
 
 
 def openai_embedding(text, api_key):
