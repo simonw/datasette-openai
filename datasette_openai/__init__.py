@@ -19,7 +19,8 @@ def openai_embedding(text, api_key):
             "model": "text-embedding-ada-002",
         },
     )
-    response.raise_for_status()
+    if response.status_code != 200:
+        return response.text
     return encode(response.json()["data"][0]["embedding"])
 
 
@@ -39,7 +40,8 @@ def openai_davinci(prompt, max_tokens, temperature, api_key):
         },
         timeout=15.0,
     )
-    response.raise_for_status()
+    if response.status_code != 200:
+        return response.text
     return response.json()["choices"][0]["text"]
 
 
