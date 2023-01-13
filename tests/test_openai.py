@@ -38,3 +38,40 @@ async def test_simple_functions(function, input, expected):
     )
     assert response.status_code == 200
     assert response.json() == [expected]
+
+
+@pytest.mark.asyncio
+async def test_openai_build_prompt():
+    ds = Datasette(memory=True)
+    await ds.invoke_startup()
+    db = ds.add_memory_database("test")
+    await db.execute_write_script(
+        """
+    create table texts (id integer primary key, text text);
+    insert into texts (text) values ('One');
+    insert into texts (text) values ('Two tokens');
+    insert into texts (text) values ('Now three tokens');
+    insert into texts (text) values ('This has four tokens');
+    insert into texts (text) values ('This one has five tokens');
+    insert into texts (text) values ('And this one has six tokens');
+    """
+    )
+    response = await ds.client.get(
+        "/test.json",
+        params={
+            "sql": """
+                select openai_build_prompt(
+                    text,
+                    "Prefix",
+                    "Suffix",
+                    50
+                )
+                from texts
+            """,
+            "_shape": "arrayfirst",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json() == [
+        "Prefix One Two tokens Now three tokens This has four tokens This one has five tokens And this one has six tokens Suffix"
+    ]
