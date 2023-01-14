@@ -80,7 +80,7 @@ order by
 limit 10
 ```
 
-## openai_build_prompt(text, prefix, suffix, completion_tokens, token_limit=4000)
+### openai_build_prompt(text, prefix, suffix, completion_tokens, token_limit=4000)
 
 This aggregate function helps build a prompt from a number of inputs in a way that fits the GPT-3 prompt size limit.
 
@@ -124,17 +124,17 @@ Given the above context, answer the following question: Examples of a language m
 ```
 The body of each entry has been truncated to the number of tokens that will allow examples from all three entries to be included in the generated prompt.
 
-## openai_strip_tags(text)
+### openai_strip_tags(text)
 
 Sometimes it can be useful to strip HTML tags from text in order to reduce the number of tokens used. This function does a very simple version of tag stripping - just removing anything that matches `<...>`.
 
-## openai_tokenize(text)
+### openai_tokenize(text)
 
 Returns a JSON array of tokens for the provided text.
 
 This uses a regular expression [extracted from OpenAI's GPT-2](https://github.com/openai/gpt-2/blob/a74da5d99abaaba920de8131d64da2862a8f213b/src/encoder.py#L53).
 
-## openai_count_tokens(text)
+### openai_count_tokens(text)
 
 Returns a count of the number of tokens in the provided text.
 
