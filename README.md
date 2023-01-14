@@ -80,6 +80,50 @@ order by
 limit 10
 ```
 
+## openai_build_prompt(text, prefix, suffix, completion_tokens, token_limit=4000)
+
+This aggregate function helps build a prompt from a number of inputs in a way that fits the GPT-3 prompt size limit.
+
+It takes the following argument:
+
+- `text` - this is the column that is being aggregated, so the function expects to have multiple values for this. All other arguments will only be read the first time they are passed, so should be consistent across all calls to the function.
+- `prefix` - text to use for the prefix of the prompt
+- `suffix` - text to use for the suffix of the prompt
+- `completion_tokens` - the number of tokens to reserve for the prompt response - this will be subtracted from the token limit
+- `token_limit` - this value is optional (there are 4-argument and 5-argument versions of the function registered). It defaults to the GPT-3 Da Vinci size limit of 4,000 tokens but can be changed if the model the prompt is being used with has a different size limit.
+
+Here's an example usage of this function, adapted from [this article](https://simonwillison.net/2023/Jan/13/semantic-search-answers/):
+
+```sql
+with top_n as (
+  select body from blog_entry order by id desc limit 3
+)
+select openai_build_prompt(body, 'Context:
+------------
+', '
+------------
+Given the above context, answer the following question: ' || :question,
+  500,
+  2000
+  ) from top_n
+```
+[Try that here](https://datasette.simonwillison.net/simonwillisonblog?sql=with+top_n+as+%28%0D%0A++select+body+from+blog_entry+order+by+id+desc+limit+5%0D%0A%29%0D%0Aselect+openai_build_prompt%28body%2C+%27Context%3A%0D%0A------------%0D%0A%27%2C+%27%0D%0A------------%0D%0AGiven+the+above+context%2C+answer+the+following+question%3A+%27+%7C%7C+%3Aquestion%2C%0D%0A++500%2C%0D%0A++2000%0D%0A++%29+from+top_n&question=Examples+of+a+language+model%3F).
+
+This query first retrieves the three most recent blog entries, then constructs a prompt that with the provided prefix and suffix designed to fit 1500 tokens (2000 total, minus 500 reserved for the response).
+
+The output looks something like this (truncated for space):
+
+```
+Context:
+------------
+< p > If you 've spent any time with GPT - 3 or ChatGPT , you 've likely thought about how ...
+I release Datasette 0 . 64 this morning . This release is mainly a response to the realization that it 's not safe to run Datasette with the SpatiaLite extension loaded if that Datasette instance is configured to enable arbitrary SQL queries from untrusted users ...
+In lieu of my regular weeknotes ( I took two weeks off for the holidays ) here 's a look back at 2022 , mainly in terms of projects and things I 've written about ...
+------------
+Given the above context, answer the following question: Examples of a language model?
+```
+The body of each entry has been truncated to the number of tokens that will allow examples from all three entries to be included in the generated prompt.
+
 ## openai_strip_tags(text)
 
 Sometimes it can be useful to strip HTML tags from text in order to reduce the number of tokens used. This function does a very simple version of tag stripping - just removing anything that matches `<...>`.
@@ -93,7 +137,6 @@ This uses a regular expression [extracted from OpenAI's GPT-2](https://github.co
 ## openai_count_tokens(text)
 
 Returns a count of the number of tokens in the provided text.
-
 
 ## Development
 
